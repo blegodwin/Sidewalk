@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { stellarService } from '../../config/stellar';
 import { AppError } from '../../core/errors/app-error';
 import { logger } from '../../core/logging/logger';
+import { ReportModel } from './report.model';
 import {
   CreateReportDTO,
   UpdateReportStatusDTO,
@@ -16,16 +17,28 @@ export const createReport = async (
   next: NextFunction,
 ) => {
   try {
-    const { description } = req.body as CreateReportDTO;
+    const { title, description, category, location, media_urls } =
+      req.body as CreateReportDTO;
+
+    const report = await ReportModel.create({
+      title,
+      description,
+      category,
+      location,
+      media_urls,
+      stellar_tx_hash: null,
+    });
 
     const contentHash = crypto
       .createHash('sha256')
-      .update(description, 'utf8')
+      .update(JSON.stringify({ title, description, category, location, media_urls }), 'utf8')
       .digest('hex');
     const txHash = await stellarService.anchorHash(contentHash);
+    await ReportModel.updateOne({ _id: report._id }, { $set: { stellar_tx_hash: txHash } });
 
     return res.status(201).json({
       message: 'Report created and anchored',
+      report_id: report._id,
       content_hash: contentHash,
       stellar_tx: txHash,
       explorer_url: stellarService.getExplorerUrl(txHash),

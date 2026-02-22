@@ -8,9 +8,12 @@
     "dev": "tsx watch src/server.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:integration": "tsx --test src/**/*.integration.test.ts"
+    "test:integration": "tsx --test src/**/*.integration.test.ts",
+    "db:migrate": "tsx src/scripts/db-migrate.ts",
+    "db:seed": "tsx src/scripts/db-seed.ts"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
     "@sidewalk/stellar": "workspace:*",
     "@stellar/stellar-sdk": "^14.5.0",
     "bcryptjs": "^3.0.3",
